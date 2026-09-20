@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crypto NFT Casino</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f0f13;
+            --card-bg: #1e1e24;
+            --primary: #ffd700;
+            --accent: #9d00ff;
+            --text: #ffffff;
+            --rare-common: #a0a0a0;
+            --rare-rare: #0070dd;
+            --rare-epic: #a335ee;
+            --rare-legendary: #ff8000;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(180deg, rgba(30,30,36,1) 0%, rgba(15,15,19,0) 100%);
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .balance-box {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--card-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #333;
+            z-index: 100;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        nav button.active {
+            color: var(--primary);
+        }
+
+        nav button svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Content Areas */
+        .page {
+            display: none;
+            padding: 20px;
+            padding-bottom: 80px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Game Cards */
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--accent), #b044ff);
+            border: none;
+            padding: 12px 25px;
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-secondary {
+            background: #333;
+        }
+
+        /* Slots Game */
+        .slots-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            background: #000;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+        }
+
+        .reel {
+            width: 60px;
+            height: 80px;
+            background: #fff;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .reel span {
+            display: block;
+            transition: transform 0.1s;
+        }
+
+        /* Dice Game */
+        .dice-stage {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 600px;
+            margin-bottom: 20px;
+        }
+
+        .cube {
+            width: 60px;
+            height: 60px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s ease-out;
+        }
+
+        .face {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #000;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: bold;
+            color: #000;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .face:nth-child(1) { transform: rotateY(0deg) translateZ(30px); }
+        .face:nth-child(2) { transform: rotateY(90deg) translateZ(30px); }
+        .face:nth-child(3) { transform: rotateY(180deg) translateZ(30px); }
+        .face:nth-child(4) { transform: rotateY(-90deg) translateZ(30px); }
+        .face:nth-child(5) { transform: rotateX(90deg) translateZ(30px); }
+        .face:nth-child(6) { transform: rotateX(-90deg) translateZ(30px); }
+
+        /* NFT Grid */
+        .nft-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .nft-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 3/4;
+            border: 2px solid transparent;
+        }
+
+        .nft-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .nft-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(0deg, #000 0%, transparent 100%);
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .rarity-common { border-color: var(--rare-common); }
+        .rarity-rare { border-color: var(--rare-rare); box-shadow: 0 0 10px var(--rare-rare); }
+        .rarity-epic { border-color: var(--rare-epic); box-shadow: 0 0 15px var(--rare-epic); }
+        .rarity-legendary { border-color: var(--rare-legendary); box-shadow: 0 0 20px var(--rare-legendary); }
+
+        .badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #fff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 80%;
+            border: 1px solid var(--primary);
+        }
+        .win-amount {
+            font-size: 24px;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="font-weight:900; font-size: 18px;">🎰 NFT CASINO</div>
+        <div class="balance-box">
+            <span>💰</span> <span id="balance">1000</span>
+        </div>
+    </header>
+
+    <!-- HOME PAGE -->
+    <div id="home" class="page active">
+        <h2>Выберите игру</h2>
+        
+        <div class="game-card">
+            <div style="font-size: 40px; margin-bottom: 10px;">🍒</div>
+            <h3>Cyber Slots</h3>
+            <p>Классические слоты с шансом выиграть NFT.</p>
+            <button class="btn" onclick="startGame('slots')">Играть (50)</button>
+        </div>
+
+        <div class="game-card">
+            <div style="font-size: 40px; margin-bottom: 10px;">🎲</div>
+            <h3>Crypto Dice</h3>
+            <p>Брось кубик. Выше 3 — победа x2.</p>
+            <button class="btn" onclick="startGame('dice')">Играть (20)</button>
+        </div>
+
+        <div class="game-card" style="border-color: var(--accent);">
+            <div style="font-size: 40px; margin-bottom: 10px;">🎁</div>
+            <h3>Ежедневный бонус</h3>
+            <p>Забирай бесплатные монеты каждый день.</p>
+            <button class="btn btn-secondary" id="bonusBtn" onclick="claimBonus()">Забрать</button>
+        </div>
+    </div>
+
+    <!-- SLOTS GAME PAGE -->
+    <div id="game-slots" class="page">
+        <h2>Cyber Slots</h2>
+        <div class="game-card">
+            <div class="slots-container">
+                <div class="reel" id="reel1"><span>🍒</span></div>
+                <div class="reel" id="reel2"><span>🍋</span></div>
+                <div class="reel" id="reel3"><span>🔔</span></div>
+            </div>
+            <p>Ставка: 50 монет</p>
+            <p>3 одинаковых = Джекпот (500) + Шанс NFT</p>
+            <button class="btn" id="spinBtn" onclick="spin()">КРУТИТЬ</button>
+            <button class="btn btn-secondary" onclick="showPage('home')">Назад</button>
+        </div>
+    </div>
+
+    <!-- DICE GAME PAGE -->
+    <div id="game-dice" class="page">
+        <h2>Crypto Dice</h2>
+        <div class="game-card">
+            <div class="dice-stage">
+                <div class="cube" id="cube">
+                    <div class="face">1</div>
+                    <div class="face">2</div>
+                    <div class="face">3</div>
+                    <div class="face">4</div>
+                    <div class="face">5</div>
+                    <div class="face">6</div>
+                </div>
+            </div>
+            <p>Ставка: 20 монет</p>
+            <p>Выпадет 4, 5 или 6 — победа (x2)</p>
+            <button class="btn" id="rollBtn" onclick="rollDice()">БРОСИТЬ</button>
+            <button class="btn btn-secondary" onclick="showPage('home')">Назад</button>
+        </div>
+    </div>
+
+    <!-- NFT INVENTORY PAGE -->
+    <div id="inventory" class="page">
+        <h2>Мои NFT</h2>
+        <p style="text-align: center; font-size: 12px; color: #888; margin-bottom: 20px;">Выпадали во время игры в слоты</p>
+        <div class="nft-grid" id="nftGrid">
+            <!-- NFTs will be injected here -->
+            <div style="grid-column: 1/-1; text-align: center; color: #555; padding: 20px;">Пока пусто. Играйте в слоты!</div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <button class="active" onclick="showPage('home')" id="nav-home">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Главная
+        </button>
+        <button onclick="showPage('inventory')" id="nav-inventory">
+            <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+            Инвентарь
+        </button>
+    </nav>
+
+    <!-- WIN MODAL -->
+    <div id="winModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">ПОБЕДА!</h3>
+            <div id="modalIcon" style="font-size: 50px;">🎉</div>
+            <div class="win-amount" id="modalAmount">+100</div>
+            <button class="btn" onclick="closeModal()">Забрать</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG & STATE ---
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        let balance = 1000;
+        let myNFTs = [];
+        let isSpinning = false;
+        let isRolling = false;
+
+        const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+        
+        // NFT Templates (Procedural Generation using SVG Data URIs)
+        const nftTemplates = [
+            { name: "Cyber Punk", type: "legendary", color: "#ff8000", icon: "🤖" },
+            { name: "Neon Cat", type: "epic", color: "#a335ee", icon: "🐱" },
+            { name: "Gold Coin", type: "rare", color: "#0070dd", icon: "🪙" },
+            { name: "Space Rock", type: "common", color: "#a0a0a0", icon: "🪨" }
+        ];
+
+        // --- CORE FUNCTIONS ---
+
+        function updateBalance(amount) {
+            balance += amount;
+            document.getElementById('balance').innerText = balance;
+            // Haptic feedback if available in TG
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            if(pageId === 'home') document.getElementById('nav-home').classList.add('active');
+            if(pageId === 'inventory') {
+                document.getElementById('nav-inventory').classList.add('active');
+                renderInventory();
+            }
+        }
+
+        function showModal(title, amount, icon = "🎉") {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalAmount').innerText = amount > 0 ? `+${amount}` : amount;
+            document.getElementById('modalIcon').innerText = icon;
+            document.getElementById('winModal').style.display = 'flex';
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function closeModal() {
+            document.getElementById('winModal').style.display = 'none';
+        }
+
+        function claimBonus() {
+            const btn = document.getElementById('bonusBtn');
+            btn.disabled = true;
+            btn.innerText = "Жди 24ч";
+            updateBalance(100);
+            showModal("Бонус получен", 100, "🎁");
+        }
+
+        // --- SLOTS LOGIC ---
+
+        function startGame(game) {
+            showPage(`game-${game}`);
+        }
+
+        function spin() {
+            if (isSpinning || balance < 50) {
+                if(balance < 50) showModal("Ошибка", "Недостаточно средств!", "❌");
+                return;
+            }
+
+            isSpinning = true;
+            updateBalance(-50);
+            document.getElementById('spinBtn').disabled = true;
+
+            const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
+            let results = [];
+
+            // Animation logic
+            let spins = 0;
+            const interval = setInterval(() => {
+                reels.forEach(reel => {
+                    const randomSym = symbols[Math.floor(Math.random() * symbols.length)];
+                    reel.querySelector('span').innerText = randomSym;
+                    reel.querySelector('span').style.transform = `translateY(${Math.random() * 10 - 5}px)`;
+                });
+                spins++;
+                if (spins > 20) {
+                    clearInterval(interval);
+                    finalizeSpin(reels);
+                }
+            }, 100);
+        }
+
+        function finalizeSpin(reels) {
+            const r1 = symbols[Math.floor(Math.random() * symbols.length)];
+            const r2 = symbols[Math.floor(Math.random() * symbols.length)];
+            // Rigged slightly for better UX: 30% chance to match r1 and r2
+            const r3 = Math.random() > 0.7 ? r1 : symbols[Math.floor(Math.random() * symbols.length)];
+
+            reels[0].querySelector('span').innerText = r1;
+            reels[1].querySelector('span').innerText = r2;
+            reels[2].querySelector('span').innerText = r3;
+
+            isSpinning = false;
+            document.getElementById('spinBtn').disabled = false;
+
+            if (r1 === r2 && r2 === r3) {
+                let win = 500;
+                let msg = "ДЖЕКПОТ!";
+                
+                // Chance to drop NFT
+                if (Math.random() > 0.5) {
+                    dropNFT();
+                    msg = "ДЖЕКПОТ + NFT!";
+                    win += 200;
+                }
+                
+                updateBalance(win);
+                showModal(msg, win, "🏆");
+            } else if (r1 === r2 || r2 === r3 || r1 === r3) {
+                let win = 20;
+                updateBalance(win);
+                showModal("Пара совпала!", win, "✨");
+            }
+        }
+
+        // --- DICE LOGIC ---
+
+        function rollDice() {
+            if (isRolling || balance < 20) {
+                if(balance < 20) showModal("Ошибка", "Недостаточно средств!", "❌");
+                return;
+            }
+
+            isRolling = true;
+            updateBalance(-20);
+            document.getElementById('rollBtn').disabled = true;
+
+            const cube = document.getElementById('cube');
+            const result = Math.floor(Math.random() * 6) + 1;
+            
+            // Calculate rotation based on result
+            // 1: 0,0 | 2: 0,-90 | 3: 0,-180 | 4: 0,90 | 5: -90,0 | 6: 90,0
+            let x = 0, y = 0;
+            switch(result) {
+                case 1: x = 0; y = 0; break;
+                case 2: x = 0; y = -90; break;
+                case 3: x = 0; y = -180; break;
+                case 4: x = 0; y = 90; break;
+                case 5: x = -90; y = 0; break;
+                case 6: x = 90; y = 0; break;
+            }
+
+            // Add extra rotations for effect
+            cube.style.transform = `rotateX(${x + 720}deg) rotateY(${y + 720}deg)`;
+
+            setTimeout(() => {
+                isRolling = false;
+                document.getElementById('rollBtn').disabled = false;
+                // Reset transform subtly for next roll without visual jump (hacky but works for simple demo)
+                setTimeout(() => {
+                     cube.style.transition = 'none';
+                     cube.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+                     setTimeout(() => cube.style.transition = 'transform 1s ease-out', 50);
+                }, 1000);
+
+                if (result >= 4) {
+                    let win = 40;
+                    updateBalance(win);
+                    showModal(`Выпало ${result}! Победа`, win, "🎲");
+                } else {
+                    showModal(`Выпало ${result}. Попробуй еще`, 0, "😢");
+                }
+
+            }, 1000);
+        }
+
+        // --- NFT SYSTEM ---
+
+        function generateNFTImage(template) {
+            // Generate SVG data URI dynamically
+            const svg = `
+            <svg xmlns='http://www.w3.org/2000/svg' width='300' height='400'>
+                <defs>
+                    <linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style='stop-color:${template.color};stop-opacity:1' />
+                        <stop offset='100%' style='stop-color:#000;stop-opacity:1' />
+                    </linearGradient>
+                </defs>
+                <rect width='100%' height='100%' fill='url(#grad)'/>
+                <circle cx='150' cy='150' r='80' fill='rgba(255,255,255,0.1)' stroke='${template.color}' stroke-width='5'/>
+                <text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='100'>${template.icon}</text>
+                <text x='50%' y='85%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='bold' fill='white' font-size='24'>${template.name}</text>
+                <rect x='10' y='10' width='80' height='30' rx='5' fill='black' opacity='0.5'/>
+                <text x='50' y='30' font-family='Arial' fill='${template.color}' font-size='14' text-anchor='middle'>NFT</text>
+            </svg>`;
+            return 'data:image/svg+xml;base64,' + btoa(svg);
+        }
+
+        function dropNFT() {
+            // Random rarity
+            const rand = Math.random();
+            let template;
+            if (rand > 0.95) template = nftTemplates[0]; // Legendary
+            else if (rand > 0.8) template = nftTemplates[1]; // Epic
+            else if (rand > 0.6) template = nftTemplates[2]; // Rare
+            else template = nftTemplates[3]; // Common
+
+            const nft = {
+                id: Date.now(),
+                ...template,
+                image: generateNFTImage(template)
+            };
+
+            myNFTs.unshift(nft);
+        }
+
+        function renderInventory() {
+            const grid = document.getElementById('nftGrid');
+            grid.innerHTML = '';
+
+            if (myNFTs.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #555; padding: 20px;">Пока пусто. Играйте в слоты!</div>';
+                return;
+            }
+
+            myNFTs.forEach(nft => {
+                const card = document.createElement('div');
+                card.className = `nft-card rarity-${nft.type}`;
+                card.innerHTML = `
+                    <img src="${nft.image}" class="nft-image" alt="${nft.name}">
+                    <div class="badge">${nft.type.toUpperCase()}</div>
+                    <div class="nft-info">
+                        <div style="font-weight:bold; color:white;">${nft.name}</div>
+                        <div style="color:#aaa;">ID: #${nft.id.toString().slice(-4)}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Init
+        updateBalance(0);
+    </script>
+</body>
+</html>
