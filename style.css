@@ -1,0 +1,198 @@
+:root{
+  --bg:#0b0d12; --panel:#141821; --panel2:#1b2030;
+  --line:#242a3a; --text:#e8ecf5; --muted:#8a93a8;
+  --accent:#7c5cff; --accent2:#22d3ee; --good:#22c55e; --bad:#ef4444;
+  --gold:#f5c451;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(1200px 600px at 10% -10%,#1a1640 0%,transparent 60%),
+             radial-gradient(1000px 500px at 110% 10%,#06303a 0%,transparent 55%),
+             var(--bg);
+  color:var(--text);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow-x:hidden;
+}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;position:sticky;top:0;z-index:10;
+  backdrop-filter:blur(14px);background:rgba(11,13,18,.6);
+  border-bottom:1px solid var(--line);
+}
+.brand{font-weight:800;letter-spacing:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.balance{display:flex;align-items:center;gap:6px;font-weight:700;font-size:15px}
+.ton-icon{color:var(--accent2);font-size:18px}
+
+.tabs{display:flex;gap:6px;padding:10px 12px;overflow-x:auto}
+.tab{
+  flex:1;min-width:90px;padding:10px 12px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--line);color:var(--muted);
+  font-weight:600;font-size:14px;cursor:pointer;transition:.2s;
+}
+.tab.active{background:linear-gradient(135deg,var(--accent),#5b3df0);color:#fff;border-color:transparent;box-shadow:0 6px 20px -8px var(--accent)}
+
+.view{padding:12px}
+.panel{animation:fade .25s ease}
+.hidden{display:none}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.section-title{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin:18px 4px 10px}
+
+.game-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.game-card{
+  background:linear-gradient(160deg,var(--panel),var(--panel2));
+  border:1px solid var(--line);border-radius:16px;padding:16px;
+  cursor:pointer;transition:transform .15s, border-color .2s;
+  position:relative;overflow:hidden;
+}
+.game-card::before{content:"";position:absolute;inset:-1px;border-radius:16px;padding:1px;background:linear-gradient(135deg,var(--accent),transparent 50%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:.25s}
+.game-card:hover::before,.game-card:active::before{opacity:1}
+.game-card:active{transform:scale(.97)}
+.game-card .emoji{font-size:32px;margin-bottom:8px}
+.game-card h3{font-size:16px;margin-bottom:2px}
+.game-card p{font-size:12px;color:var(--muted)}
+
+.arena{
+  margin-top:14px;background:var(--panel);border:1px solid var(--line);
+  border-radius:18px;padding:18px;min-height:240px;
+}
+.arena-empty{text-align:center;color:var(--muted);padding:60px 0;font-size:14px}
+
+.bet-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.bet-row label{font-size:12px;color:var(--muted)}
+.bet-input{
+  flex:1;min-width:100px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--text);padding:10px 12px;border-radius:10px;font-size:15px;font-weight:600;
+  outline:none;
+}
+.bet-input:focus{border-color:var(--accent)}
+.chip{padding:6px 10px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);font-size:12px;font-weight:600;cursor:pointer}
+.chip.active{background:var(--accent);border-color:transparent;color:#fff}
+
+.btn{
+  width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
+  font-weight:700;font-size:15px;color:#fff;
+  background:linear-gradient(135deg,var(--accent),#5b3df0);
+  box-shadow:0 8px 24px -10px var(--accent);
+  transition:transform .1s;
+}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);box-shadow:none}
+.btn.good{background:linear-gradient(135deg,var(--good),#15803d)}
+.btn.bad{background:linear-gradient(135deg,var(--bad),#991b1b)}
+
+.choice-row{display:flex;gap:10px;margin:14px 0}
+.choice-row .btn{flex:1}
+
+.result{
+  margin-top:14px;padding:14px;border-radius:12px;text-align:center;
+  font-weight:700;font-size:16px;
+}
+.result.win{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--good)}
+.result.lose{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--bad)}
+
+/* coin */
+.coin{
+  width:120px;height:120px;margin:20px auto;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#ffe27a,#b8860b);
+  display:flex;align-items:center;justify-content:center;
+  font-size:48px;font-weight:900;color:#5a3d00;
+  box-shadow:0 10px 30px -8px rgba(245,196,81,.5), inset 0 -8px 20px rgba(0,0,0,.25);
+  transition:transform .6s;
+}
+.coin.flip{animation:coinflip 1s ease}
+@keyframes coinflip{
+  0%{transform:rotateY(0)}
+  100%{transform:rotateY(1800deg)}
+}
+
+/* dice */
+.dice-display{display:flex;justify-content:center;gap:14px;margin:20px 0}
+.die{
+  width:70px;height:70px;background:#fff;color:#111;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;
+  box-shadow:0 8px 20px -6px rgba(0,0,0,.5);
+}
+.die.roll{animation:diceroll .6s ease}
+@keyframes diceroll{
+  0%,100%{transform:rotate(0)}
+  25%{transform:rotate(180deg) scale(.8)}
+  75%{transform:rotate(-180deg) scale(1.1)}
+}
+
+/* slots */
+.slots{display:flex;justify-content:center;gap:8px;margin:20px 0}
+.reel{
+  width:70px;height:90px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:42px;overflow:hidden;
+}
+.reel.spin{animation:reelspin .1s linear infinite}
+@keyframes reelspin{
+  0%{transform:translateY(-4px)}
+  50%{transform:translateY(4px)}
+  100%{transform:translateY(-4px)}
+}
+
+/* crash */
+.crash-display{
+  height:180px;background:linear-gradient(180deg,transparent,rgba(124,92,255,.08));
+  border:1px solid var(--line);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:48px;font-weight:900;color:var(--accent2);
+  margin:14px 0;position:relative;overflow:hidden;
+}
+.crash-display.boom{color:var(--bad);animation:shake .4s}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+
+/* nft */
+.nft-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.nft-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  overflow:hidden;cursor:pointer;transition:.2s;
+}
+.nft-card:active{transform:scale(.97)}
+.nft-art{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:64px;position:relative;
+}
+.nft-info{padding:10px 12px;border-top:1px solid var(--line)}
+.nft-info h4{font-size:14px;margin-bottom:4px}
+.nft-info .price{font-size:13px;color:var(--accent2);font-weight:700}
+.nft-info .owner{font-size:11px;color:var(--muted);margin-top:2px}
+.rarity{
+  position:absolute;top:8px;right:8px;padding:3px 8px;border-radius:6px;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+}
+.rarity.common{background:rgba(138,147,168,.2);color:var(--muted)}
+.rarity.rare{background:rgba(34,211,238,.15);color:var(--accent2)}
+.rarity.epic{background:rgba(124,92,255,.2);color:var(--accent)}
+.rarity.legendary{background:rgba(245,196,81,.2);color:var(--gold)}
+
+/* profile */
+.profile-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;text-align:center}
+.avatar{
+  width:80px;height:80px;border-radius:50%;margin:0 auto 12px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;font-weight:900;color:#fff;
+}
+.name{font-size:18px;font-weight:700;margin-bottom:16px}
+.stat{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.stat span{color:var(--muted)}
+.stat b{color:var(--text)}
+
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--panel);border:1px solid var(--line);padding:12px 20px;
+  border-radius:12px;font-size:14px;font-weight:600;opacity:0;
+  transition:.3s;pointer-events:none;z-index:100;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
